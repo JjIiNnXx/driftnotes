@@ -258,7 +258,7 @@ pub fn seed(connection: &mut Connection) -> ApiResult<()> {
     }
 
     for (key, value) in [
-        ("site_title", "\"栖迟\""),
+        ("site_title", "\"漂流笔记\""),
         ("site_description", "\"记录技术、阅读与缓慢生活\""),
         ("site_language", "\"zh-CN\""),
     ] {

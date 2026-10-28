@@ -22,7 +22,7 @@ Create a local commit only when the user requests it or when it is required by a
 | 5 | Dead Code | Delete unused imports, variables, functions, and orphaned files in the same change. When replacing a feature, remove the entire old chain (route, handler, service, repository call, client, type, docs, test). |
 | 6 | Cleanliness | NEVER leave commented-out code, `TODO`, `FIXME`, placeholder data, unused fallback paths, or broken user-visible flows. |
 | 7 | Docs | Update the affected `docs/**/*.md` and `docs/index.toml` whenever structure, routes, fields, commands, schema, logging, or conventions change. `README.md` and `docs/` are written in Chinese. |
-| 8 | Security | The local admin API has NO authentication and is local-only. NEVER bind it to a public interface or expose it. Do not commit secrets, tokens, cookies, or credentials. Production MUST add Access/HMAC and `no-store` as documented in `docs/03-development/02-认证与安全.md`; local code MUST NOT pretend it is implemented. |
+| 8 | Security | The local admin API has NO authentication and is local-only. NEVER bind it to a public interface or expose it. Do not commit secrets, tokens, cookies, or credentials. Production MUST add Access/HMAC and `no-store` as documented in `docs/03-开发规范/02-认证与安全.md`; local code MUST NOT pretend it is implemented. |
 | 9 | Logging | Logs MUST NOT contain request bodies, Markdown content, cookies, `Authorization` headers, passwords, or keys. Daily files stay under `log/backend/` and `log/frontend/` with 3-day retention. |
 | 10 | Content Integrity | Posts keep both `content_markdown` and ammonia-sanitized `content_html`. Updates use the `version` optimistic lock; the slug is immutable after publishing. Do not bypass these rules in handlers or client code. |
 | 11 | Uploads | Accept only magic-byte-validated JPEG/PNG/GIF/WebP, deduplicate by SHA-256, and keep the 6 MB body limit in `backend/src/router.rs`. |
@@ -83,11 +83,11 @@ Do not add AI/model/tool co-author trailers.
 
 | If the task touches... | Read |
 |---|---|
-| Local runtime, layering, API contract | `docs/03-development/01-本地实现说明.md` |
-| Auth, secrets, upload safety, headers | `docs/03-development/02-认证与安全.md` |
-| Tests, quality gate, manual acceptance | `docs/03-development/03-测试方案.md` |
-| Logs, retention, format | `docs/03-development/04-日志规范.md` |
-| Architecture, data model, routes | `docs/02-architecture/` |
-| Startup, environment, deployment | `docs/04-operations/` |
+| Local runtime, layering, API contract | `docs/03-开发规范/01-本地实现说明.md` |
+| Auth, secrets, upload safety, headers | `docs/03-开发规范/02-认证与安全.md` |
+| Tests, quality gate, manual acceptance | `docs/03-开发规范/03-测试方案.md` |
+| Logs, retention, format | `docs/03-开发规范/04-日志规范.md` |
+| Architecture, data model, routes | `docs/02-架构设计/` |
+| Startup, environment, deployment | `docs/04-运维部署/` |
 
 `docs/index.toml` is the canonical index. When adding, deleting, renaming, or moving a document, update the index in the same change.

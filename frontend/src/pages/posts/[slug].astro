@@ -11,16 +11,16 @@ const structuredData = {
   '@context': 'https://schema.org', '@type': 'BlogPosting', headline: post.title,
   description: post.excerpt, datePublished: post.published_at, dateModified: post.updated_at,
   image: post.cover_image ? new URL(post.cover_image, Astro.url.origin) : undefined,
-  author: { '@type': 'Person', name: '栖迟' },
+  author: { '@type': 'Person', name: '漂流笔记' },
 };
 ---
-<BaseLayout title={`${post.title} · 栖迟`} description={post.excerpt} image={post.cover_image || undefined}>
+<BaseLayout title={`${post.title} · 漂流笔记`} description={post.excerpt} image={post.cover_image || undefined}>
   <script type="application/ld+json" set:html={JSON.stringify(structuredData)} slot="head" />
   <article>
     <header class="article-hero"><div class="shell article-header">
       <div class="eyebrow">{post.tags[0]?.name || '随笔'} · Essay</div>
       <h1>{post.title}</h1>
-      <div class="post-meta"><time>{formatDate(post.published_at)}</time><span class="dot"></span><span>{readingTime(post)}</span><span class="dot"></span><span>栖迟</span></div>
+      <div class="post-meta"><time>{formatDate(post.published_at)}</time><span class="dot"></span><span>{readingTime(post)}</span><span class="dot"></span><span>漂流笔记</span></div>
     </div></header>
     <div class="article-cover"><img src={post.cover_image || '/covers/default.svg'} alt={post.title} /></div>
     <div class="shell article-layout">

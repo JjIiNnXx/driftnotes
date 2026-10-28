@@ -11,12 +11,12 @@ const path = Astro.url.pathname;
 <head>
   <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="robots" content="noindex,nofollow" /><link rel="icon" href="/favicon.svg" />
-  <title>{title} · 栖迟后台</title>
+  <title>{title} · 漂流笔记后台</title>
 </head>
 <body class="admin-body">
   <div class="admin-layout">
     <aside class="admin-sidebar">
-      <a class="admin-brand" href="/admin"><span class="brand-mark"><i></i><i></i></span><span><strong>栖迟</strong><small>CONTENT STUDIO</small></span></a>
+      <a class="admin-brand" href="/admin"><span class="brand-mark"><i></i><i></i></span><span><strong>漂流笔记</strong><small>CONTENT STUDIO</small></span></a>
       <nav class="admin-nav">
         <span class="admin-nav-label">工作台</span>
         <a class:list={[{ active: path === '/admin' }]} href="/admin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>概览</a>
@@ -26,10 +26,10 @@ const path = Astro.url.pathname;
         <a href="/admin/posts/new"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 5v14M5 12h14"/></svg>写新文章</a>
         <a href="/" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 11 12 4l9 7M5 10v10h14V10M9 20v-6h6v6"/></svg>查看博客<small>↗</small></a>
       </nav>
-      <div class="admin-user"><div class="avatar">栖</div><div><strong>栖迟</strong><span>本站管理员</span></div><span class="status-dot"></span></div>
+      <div class="admin-user"><div class="avatar">漂</div><div><strong>漂流笔记</strong><span>本站管理员</span></div><span class="status-dot"></span></div>
     </aside>
     <div class="admin-main">
-      <header class="admin-topbar"><button class="admin-menu" aria-label="打开菜单">☰</button><div class="admin-breadcrumb"><span>栖迟</span><b>/</b><span>{title}</span></div><div class="admin-top-actions"><span class="local-badge"><i></i>本地开发环境</span><a href="/" target="_blank">查看网站 ↗</a></div></header>
+      <header class="admin-topbar"><button class="admin-menu" aria-label="打开菜单">☰</button><div class="admin-breadcrumb"><span>漂流笔记</span><b>/</b><span>{title}</span></div><div class="admin-top-actions"><span class="local-badge"><i></i>本地开发环境</span><a href="/" target="_blank">查看网站 ↗</a></div></header>
       <main class="admin-content">
         <div class="admin-page-heading"><div><div class="admin-eyebrow">{eyebrow}</div><h1>{title}</h1>{description && <p>{description}</p>}</div><div class="admin-heading-actions"><slot name="actions" /></div></div>
         <slot />
