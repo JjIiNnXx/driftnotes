@@ -28,6 +28,7 @@ Create a local commit only when the user requests it or when it is required by a
 | 11 | Uploads | Accept only magic-byte-validated JPEG/PNG/GIF/WebP, deduplicate by SHA-256, and keep the 6 MB body limit in `backend/src/router.rs`. |
 | 12 | Verification | `bash script/check.sh` is the only full gate: docs index → `cargo fmt --check` → `cargo test` → `astro build`. Run it before handoff and never claim a check you did not run. |
 | 13 | Branching | NEVER commit or push directly to `main`. Every change MUST go through a `feature_<short-name>` branch and a merge request targeting `main`. |
+| 14 | Merge Authority | Agents MUST NOT merge pull requests, enable auto-merge, or push to `main`. After CI passes, report the PR URL and stop; the repository owner merges in the GitHub web UI. |
 
 ## Baseline
 
@@ -37,7 +38,7 @@ Create a local commit only when the user requests it or when it is required by a
 - Run the backend from `backend/` or set `BLOG_DATA_DIR`; the default data dir is relative to the current working directory. `script/dev.sh` pins it to `backend/data/`.
 - Astro 7 daemonizes in non-interactive shells. Stop strays with `cd frontend && npx astro dev stop`; inspect them with `npx astro dev logs`.
 - Single backend test: `cd backend && cargo test <name>`. Backend tests are inline `#[cfg(test)]` modules under `backend/src/services/`; there are no frontend tests.
-- CI (`.github/workflows/check.yml`) runs `bash script/check.sh` on pull requests and `main`. Keep it green before merging.
+- CI (`.github/workflows/check.yml`) runs `bash script/check.sh` on pull requests and `main`. Keep it green before merging; only the repository owner merges PRs in the web UI.
 
 ## Before Coding
 
@@ -60,7 +61,8 @@ Create a local commit only when the user requests it or when it is required by a
 - Start from the latest `main`: `git checkout main && git pull --rebase origin main && git checkout -b feature_<short-name>`.
 - Keep history linear. Rebase onto `origin/main` before opening or updating the MR: `git fetch origin && git rebase origin/main`. Resolve conflicts during rebase; never merge `main` into the feature branch and never create a merge commit.
 - Push the feature branch and open the MR only when the user asks to deliver/merge. If a pushed branch was rebased, update it with `git push --force-with-lease origin feature_<short-name>`; never force-push `main`.
-- Merge the MR with rebase or fast-forward, not a merge commit. Then update local `main` with `git checkout main && git pull --rebase origin main` and delete the feature branch.
+- NEVER merge the MR yourself. CI runs the `Check` workflow when the PR is opened or updated, validating the merge result against `main`; after it passes, report the PR URL and stop. The repository owner merges in the GitHub web UI with rebase. Do not use `gh pr merge`, the merge API, or auto-merge.
+- After the owner confirms the merge, update local `main` with `git checkout main && git pull --rebase origin main` and delete the local feature branch.
 - Run `bash script/setup-git-hooks.sh` once per clone. The local `pre-push` hook blocks direct pushes to `main`; GitHub branch protection is unavailable for private repositories on the free plan, so CI also runs a `guard-main` check after push.
 - When the user requests a commit, use a symbol-level message: a one-line purpose, then one bullet per added, modified, or deleted named symbol explaining why. File-level bullets are allowed only for artifacts without named code symbols (docs, SQL, config, generated assets).
 
