@@ -1,0 +1,12 @@
+node_modules/
+frontend/dist/
+frontend/.astro/
+frontend/.wrangler/
+backend/target/
+backend/data/
+.DS_Store
+*.log
+
+# Agent-local skills, not part of the blog
+.agents/
+skills-lock.json

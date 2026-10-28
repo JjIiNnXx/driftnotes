@@ -1,0 +1,96 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+}
+
+const {
+  title = '栖迟 · 记录技术、阅读与缓慢生活',
+  description = '一个关于技术、写作、阅读与日常观察的个人博客。',
+  image,
+} = Astro.props;
+const path = Astro.url.pathname;
+const canonical = new URL(path, Astro.url.origin);
+---
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate" type="application/rss+xml" title="栖迟 RSS" href="/rss.xml" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    {image && <meta property="og:image" content={new URL(image, Astro.url.origin)} />}
+    <title>{title}</title>
+    <slot name="head" />
+    <script is:inline>
+      (() => {
+        const saved = localStorage.getItem('qichi-theme');
+        const dark = saved === 'dark' || (!saved && matchMedia('(prefers-color-scheme: dark)').matches);
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">跳到正文</a>
+    <header class="site-header">
+      <div class="shell header-inner">
+        <a class="brand" href="/" aria-label="栖迟首页">
+          <span class="brand-mark" aria-hidden="true"><i></i><i></i></span>
+          <span class="brand-name">栖迟</span>
+          <span class="brand-en">QICHI NOTES</span>
+        </a>
+        <nav class="main-nav" aria-label="主导航">
+          <a class:list={[{ active: path === '/' }]} href="/">首页</a>
+          <a class:list={[{ active: path.startsWith('/posts') || path.startsWith('/tags') }]} href="/posts">文章</a>
+          <a class:list={[{ active: path.startsWith('/archive') }]} href="/archive">归档</a>
+          <a class:list={[{ active: path.startsWith('/about') }]} href="/about">关于</a>
+        </nav>
+        <div class="header-actions">
+          <button class="icon-button theme-toggle" type="button" aria-label="切换深浅色" title="切换深浅色">
+            <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.66 6.34l1.41-1.41"/></svg>
+            <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8Z"/></svg>
+          </button>
+          <a class="write-link" href="/admin"><span>写作</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m15 5 4 4M4 20l4.5-1 10-10a2.8 2.8 0 0 0-4-4l-10 10L4 20Z"/></svg></a>
+          <button class="menu-button" type="button" aria-label="打开导航" aria-expanded="false"><span></span><span></span></button>
+        </div>
+      </div>
+    </header>
+
+    <main id="main-content"><slot /></main>
+
+    <footer class="site-footer">
+      <div class="shell footer-grid">
+        <div>
+          <a class="brand footer-brand" href="/"><span class="brand-mark"><i></i><i></i></span><span class="brand-name">栖迟</span></a>
+          <p>在喧嚣之外，保留思考的余地。<br />记录技术、阅读与缓慢生活。</p>
+        </div>
+        <div class="footer-links"><strong>探索</strong><a href="/posts">全部文章</a><a href="/tags">话题标签</a><a href="/archive">文章归档</a></div>
+        <div class="footer-links"><strong>联系</strong><a href="/about">关于我</a><a href="mailto:hello@example.com">邮件</a><a href="/rss.xml">RSS 订阅</a></div>
+        <div class="footer-note"><span>NO. 026</span><p>用文字整理思绪，<br />用代码构建工具。</p></div>
+      </div>
+      <div class="shell footer-bottom"><span>© 2026 栖迟 · 保留所有权利</span><span>Built with Astro & Rust</span></div>
+    </footer>
+    <script is:inline>
+      const themeButton = document.querySelector('.theme-toggle');
+      themeButton?.addEventListener('click', () => {
+        const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+        document.documentElement.dataset.theme = next;
+        localStorage.setItem('qichi-theme', next);
+      });
+      const menuButton = document.querySelector('.menu-button');
+      menuButton?.addEventListener('click', () => {
+        const open = document.body.classList.toggle('nav-open');
+        menuButton.setAttribute('aria-expanded', String(open));
+      });
+      document.querySelectorAll('.main-nav a').forEach(a => a.addEventListener('click', () => document.body.classList.remove('nav-open')));
+    </script>
+  </body>
+</html>

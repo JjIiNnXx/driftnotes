@@ -1,0 +1,190 @@
+schema_version = 1
+title = "栖迟个人博客文档集"
+description = "个人博客从方案、架构、开发规范到运维部署的完整文档。"
+language = "zh-CN"
+updated_at = "2026-10-28"
+default_document = "01-solution/01-方案总览.md"
+source = "飞书《个人博客技术方案》v1.1；2026-10-28 迁移为本地 Markdown 后删除飞书原文档"
+
+[conventions]
+document_root = "."
+path_style = "relative-to-docs"
+daily_log_retention_days = 3
+log_cleanup_interval_hours = 72
+
+[[groups]]
+id = "solution"
+title = "方案设计"
+path = "01-solution"
+summary = "回答为什么做、做到什么边界、成本多少、如何分阶段推进。"
+
+[[groups.documents]]
+id = "overview"
+title = "方案总览"
+path = "01-solution/01-方案总览.md"
+summary = "方案摘要、核心决策、建设目标、非目标与默认假设。"
+tags = ["目标", "边界", "核心决策"]
+
+[[groups.documents]]
+id = "cost"
+title = "免费额度与成本控制"
+path = "01-solution/02-成本与免费额度.md"
+summary = "Cloudflare 免费额度、CPU/请求约束、R2 与 Zero Trust 的账单边界。"
+tags = ["成本", "免费额度", "Cloudflare"]
+
+[[groups.documents]]
+id = "roadmap"
+title = "分阶段实施路线"
+path = "01-solution/03-实施路线.md"
+summary = "从阶段零技术验证到最小可用、完整体验和增强功能的推进顺序。"
+tags = ["路线图", "阶段零", "Go/No-Go"]
+
+[[groups.documents]]
+id = "risk"
+title = "风险、迁移预留与结论"
+path = "01-solution/04-风险与结论.md"
+summary = "主要风险与应对、PostgreSQL 迁移预留，以及评审后的最终结论。"
+tags = ["风险", "结论", "迁移"]
+
+[[groups]]
+id = "architecture"
+title = "架构设计"
+path = "02-architecture"
+summary = "总体架构、技术选型、目录、数据库、API、核心流程、缓存、页面与 SEO。"
+
+[[groups.documents]]
+id = "architecture-overview"
+title = "总体架构"
+path = "02-architecture/01-总体架构.md"
+summary = "生产目标的双 Worker 架构、Service Binding 与本地实现映射。"
+tags = ["总体架构", "Workers", "本地映射"]
+
+[[groups.documents]]
+id = "technology"
+title = "技术选型"
+path = "02-architecture/02-技术选型.md"
+summary = "Astro 7.4、Rust、SQLite/D1、R2、Markdown 渲染与图片处理选型。"
+tags = ["Astro", "Rust", "技术选型"]
+
+[[groups.documents]]
+id = "directory"
+title = "项目目录设计"
+path = "02-architecture/03-项目目录.md"
+summary = "当前前后端、文档、脚本、日志与运行时数据的实际目录结构。"
+tags = ["目录", "Monorepo", "边界"]
+
+[[groups.documents]]
+id = "database"
+title = "数据库设计"
+path = "02-architecture/04-数据库设计.md"
+summary = "posts、tags、post_tags、assets、settings 表关系与字段约束。"
+tags = ["SQLite", "D1", "数据模型"]
+
+[[groups.documents]]
+id = "api"
+title = "API 设计"
+path = "02-architecture/05-API设计.md"
+summary = "当前本地 Rust API 的公开/管理接口、分页、响应包络与错误码。"
+tags = ["API", "契约", "错误码"]
+
+[[groups.documents]]
+id = "flows"
+title = "核心流程"
+path = "02-architecture/06-核心流程.md"
+summary = "发布文章、上传图片、阅读文章的关键步骤与约束。"
+tags = ["流程", "发布", "上传"]
+
+[[groups.documents]]
+id = "cache"
+title = "缓存与性能设计"
+path = "02-architecture/07-缓存与性能.md"
+summary = "图片长期缓存、HTML 不缓存、workers.dev 限制与 Workers Cache 评估。"
+tags = ["缓存", "性能", "CPU"]
+
+[[groups.documents]]
+id = "pages-seo"
+title = "页面、SEO 与可访问性"
+path = "02-architecture/08-页面与SEO.md"
+summary = "公开页、管理页、RSS、Sitemap、结构化数据与可访问性要求。"
+tags = ["页面", "SEO", "可访问性"]
+
+[[groups.documents]]
+id = "migration"
+title = "后续迁移 PostgreSQL 的预留"
+path = "02-architecture/09-后续迁移.md"
+summary = "保留 SQL 边界、参数化查询和 repository 层，降低未来迁移成本。"
+tags = ["迁移", "PostgreSQL", "Repository"]
+
+[[groups]]
+id = "development"
+title = "开发规范"
+path = "03-development"
+summary = "本地实现、认证安全、测试门禁和日志规范。"
+
+[[groups.documents]]
+id = "local-implementation"
+title = "本地实现说明"
+path = "03-development/01-本地实现说明.md"
+summary = "本地运行形态、后端分层、API 契约、本地到生产映射与已知限制。"
+tags = ["本地开发", "分层", "接口契约"]
+
+[[groups.documents]]
+id = "security"
+title = "认证与安全设计"
+path = "03-development/02-认证与安全.md"
+summary = "Access、身份校验、CSRF、上传安全、响应头与本地无认证警告。"
+tags = ["安全", "Access", "认证"]
+
+[[groups.documents]]
+id = "testing"
+title = "测试方案"
+path = "03-development/03-测试方案.md"
+summary = "当前质量门禁、手工验收流程，以及生产阶段需要补充的测试。"
+tags = ["测试", "检查", "验收"]
+
+[[groups.documents]]
+id = "logging"
+title = "日志规范"
+path = "03-development/04-日志规范.md"
+summary = "前后端日志目录、按天文件、3 天保留、72 小时清理、格式与查看方式。"
+tags = ["日志", "保留策略", "排障"]
+
+[[groups]]
+id = "operations"
+title = "运维部署"
+path = "04-operations"
+summary = "本地一键启动、环境划分、生产部署顺序与备份恢复。"
+
+[[groups.documents]]
+id = "deployment"
+title = "本地开发与部署"
+path = "04-operations/01-本地开发与部署.md"
+summary = "本地环境、一键启动、端口、数据/日志目录与 Cloudflare 部署顺序。"
+tags = ["一键启动", "部署", "环境"]
+
+[[groups.documents]]
+id = "backup"
+title = "备份与恢复"
+path = "04-operations/02-备份与恢复.md"
+summary = "本地 SQLite/图片备份、生产备份频率、FTS5 注意事项与恢复顺序。"
+tags = ["备份", "恢复", "SQLite"]
+
+[[groups]]
+id = "reviews"
+title = "评审记录"
+path = "05-reviews"
+summary = "2026-10-28 评审修订记录与外部参考资料。"
+
+[[groups.documents]]
+id = "review-log"
+title = "评审与修订记录"
+path = "05-reviews/01-评审与修订记录.md"
+summary = "15 项评审问题的原设计、修订结论与影响范围。"
+tags = ["评审", "修订", "决策记录"]
+
+[[groups.documents]]
+id = "references"
+title = "参考资料"
+path = "05-reviews/02-参考资料.md"
+summary = "Cloudflare Workers、D1、R2、Astro 与 Workers Cache 官方文档链接。"
+tags = ["参考资料", "官方文档"]

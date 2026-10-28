@@ -1,0 +1,8 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import PostEditor from '../../../components/PostEditor.astro';
+---
+<AdminLayout title="写新文章" eyebrow="EDITOR" description="从一个清晰的想法开始，保存草稿或直接发布。">
+  <a slot="actions" class="button secondary" href="/admin/posts">← 返回文章列表</a>
+  <PostEditor />
+</AdminLayout>

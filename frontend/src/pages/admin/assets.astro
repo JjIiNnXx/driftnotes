@@ -1,0 +1,97 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { apiFetch } from '../../lib/api';
+
+interface Asset {
+  id: number;
+  key: string;
+  filename: string;
+  content_type: string;
+  size: number;
+  url: string;
+  created_at: string;
+}
+
+const result = await apiFetch<{ data: { items: Asset[] } }>('/api/admin/assets');
+const assets = result.data.items;
+const formatSize = (bytes: number) => bytes >= 1024 * 1024
+  ? `${(bytes / 1024 / 1024).toFixed(1)} MB`
+  : `${Math.max(1, Math.round(bytes / 1024))} KB`;
+---
+<AdminLayout title="图片资源" eyebrow="ASSETS" description="上传博客封面和正文配图。相同文件会自动复用，不会重复占用空间。">
+  <section class="upload-zone" id="upload-zone">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M12 16V4m-5 5 5-5 5 5M4 15v5h16v-5"/></svg>
+    <h2>把图片拖到这里，或选择文件</h2>
+    <p>支持 JPEG、PNG、GIF、WebP，单张不超过 5 MB</p>
+    <label class="button" for="asset-file">选择图片</label>
+    <input id="asset-file" type="file" accept="image/jpeg,image/png,image/gif,image/webp" />
+  </section>
+
+  {assets.length ? (
+    <div class="asset-grid" id="asset-grid">
+      {assets.map(asset => (
+        <article class="asset-card" data-id={asset.id}>
+          <div class="asset-image"><img src={asset.url} alt={asset.filename} loading="lazy" /></div>
+          <div class="asset-info">
+            <strong title={asset.filename}>{asset.filename}</strong>
+            <span>{formatSize(asset.size)} · {asset.content_type.replace('image/', '').toUpperCase()}</span>
+            <div class="asset-actions">
+              <button class="copy-url" data-url={asset.url}>复制地址</button>
+              <button class="delete" data-id={asset.id}>删除</button>
+            </div>
+          </div>
+        </article>
+      ))}
+    </div>
+  ) : (
+    <div class="panel"><div class="panel-body" style="text-align:center;color:#8b938c;font-size:12px">
+      还没有上传过图片。封面也可以直接使用内置的 /covers/*.svg。
+    </div></div>
+  )}
+</AdminLayout>
+<script>
+  const zone = document.getElementById('upload-zone') as HTMLElement;
+  const input = document.getElementById('asset-file') as HTMLInputElement;
+
+  async function upload(file: File) {
+    const body = new FormData();
+    body.append('file', file);
+    const response = await fetch('/api/admin/assets', { method: 'POST', body });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error?.message || '上传失败');
+    (window as any).showToast(result.data.deduplicated ? '相同图片已存在，已复用' : '图片上传成功');
+    setTimeout(() => location.reload(), 500);
+  }
+
+  input?.addEventListener('change', async () => {
+    const chosen = input.files?.[0];
+    if (!chosen) return;
+    try { await upload(chosen); } catch (error) { (window as any).showToast(error instanceof Error ? error.message : '上传失败', 'error'); }
+  });
+
+  ['dragenter', 'dragover'].forEach(type => zone?.addEventListener(type, event => { event.preventDefault(); zone.classList.add('dragging'); }));
+  ['dragleave', 'drop'].forEach(type => zone?.addEventListener(type, event => { event.preventDefault(); zone.classList.remove('dragging'); }));
+  zone?.addEventListener('drop', async (event: DragEvent) => {
+    const chosen = event.dataTransfer?.files[0];
+    if (!chosen) return;
+    try { await upload(chosen); } catch (error) { (window as any).showToast(error instanceof Error ? error.message : '上传失败', 'error'); }
+  });
+
+  document.querySelectorAll<HTMLButtonElement>('.copy-url').forEach(button => button.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(location.origin + button.dataset.url);
+      (window as any).showToast('图片地址已复制');
+    } catch { (window as any).showToast('复制失败，请手动选择地址', 'error'); }
+  }));
+
+  document.querySelectorAll<HTMLButtonElement>('.delete').forEach(button => button.addEventListener('click', async () => {
+    if (!confirm('确定删除这张图片吗？如果文章正在引用它，删除会被拒绝。')) return;
+    try {
+      const response = await fetch(`/api/admin/assets/${button.dataset.id}`, { method: 'DELETE' });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error?.message || '删除失败');
+      (window as any).showToast('图片已删除');
+      button.closest('.asset-card')?.remove();
+    } catch (error) { (window as any).showToast(error instanceof Error ? error.message : '删除失败', 'error'); }
+  }));
+</script>

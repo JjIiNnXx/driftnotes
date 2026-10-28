@@ -1,0 +1,13 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import EmptyState from '../../components/EmptyState.astro';
+import { getTags } from '../../lib/api';
+
+const tags = await getTags();
+---
+<BaseLayout title="话题标签 · 栖迟" description="按话题浏览栖迟的文章。">
+  <section class="page-hero"><div class="shell"><div class="eyebrow">Topics & ideas</div><h1>话题标签</h1><p>文章并不只属于时间线。沿着一个话题，找到那些彼此呼应的思考。</p></div></section>
+  <section class="page-content"><div class="shell">
+    {tags.length ? <div class="tag-grid">{tags.map(tag => <a class="tag-card" href={`/tags/${tag.slug}`}><h2>#{tag.name}</h2><p>{tag.post_count || 0} 篇文章 · 进入话题 →</p></a>)}</div> : <EmptyState />}
+  </div></section>
+</BaseLayout>

@@ -1,0 +1,20 @@
+---
+import AdminLayout from '../../../../layouts/AdminLayout.astro';
+import PostEditor from '../../../../components/PostEditor.astro';
+import { apiFetch, type Post } from '../../../../lib/api';
+
+const id = Number(Astro.params.id);
+if (!Number.isInteger(id) || id < 1) return Astro.redirect('/admin/posts');
+
+let post: Post;
+try {
+  const result = await apiFetch<{ data: { post: Post } }>(`/api/admin/posts/${id}`);
+  post = result.data.post;
+} catch {
+  return Astro.redirect('/admin/posts');
+}
+---
+<AdminLayout title="编辑文章" eyebrow="EDITOR" description={post.status === 'published' ? '这篇文章已经公开。修改后保存会立即更新公开页面。' : '继续完善这篇内容，准备好后再发布。'}>
+  <a slot="actions" class="button secondary" href="/admin/posts">← 返回文章列表</a>
+  <PostEditor post={post} />
+</AdminLayout>

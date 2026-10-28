@@ -1,0 +1,39 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { apiFetch, type Post } from '../../lib/api';
+import { formatDateTime, statusLabels } from '../../lib/format';
+
+interface Stats { total_posts: number; published_posts: number; draft_posts: number; archived_posts?: number; asset_count: number; asset_size_bytes?: number }
+const [statsResult, postsResult] = await Promise.all([
+  apiFetch<{ data: Stats }>('/api/admin/stats'),
+  apiFetch<{ data: { items: Post[] } | Post[] }>('/api/admin/posts'),
+]);
+const stats = statsResult.data;
+const recent = (Array.isArray(postsResult.data) ? postsResult.data : postsResult.data.items).slice(0, 5);
+const sizeMb = ((stats.asset_size_bytes || 0) / 1024 / 1024).toFixed(1);
+---
+<AdminLayout title="工作台" eyebrow="OVERVIEW" description="早上好，栖迟。这里是你博客的最新情况。">
+  <a slot="actions" class="button" href="/admin/posts/new">＋ 写新文章</a>
+  <section class="stats-grid">
+    <div class="stat-card"><div class="stat-top"><span>全部文章</span><span class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3h9l4 4v14H6zM14 3v5h5M9 13h6M9 17h6"/></svg></span></div><strong class="stat-value">{stats.total_posts}</strong><span class="stat-note">持续记录，慢慢积累</span></div>
+    <div class="stat-card"><div class="stat-top"><span>已发布</span><span class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="m8 12 3 3 5-6"/></svg></span></div><strong class="stat-value">{stats.published_posts}</strong><span class="stat-note">公开可见的文章</span></div>
+    <div class="stat-card"><div class="stat-top"><span>草稿箱</span><span class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 20l4.5-1 10-10a2.8 2.8 0 0 0-4-4l-10 10L4 20ZM13 6l4 4"/></svg></span></div><strong class="stat-value">{stats.draft_posts}</strong><span class="stat-note">等待继续完善的想法</span></div>
+    <div class="stat-card"><div class="stat-top"><span>图片资源</span><span class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></span></div><strong class="stat-value">{stats.asset_count}</strong><span class="stat-note">约占用 {sizeMb} MB 本地存储</span></div>
+  </section>
+  <div class="admin-grid">
+    <section class="panel">
+      <div class="panel-header"><h2>最近编辑</h2><a href="/admin/posts">查看全部 →</a></div>
+      <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>文章</th><th>状态</th><th>更新时间</th><th></th></tr></thead><tbody>
+        {recent.map(post => <tr><td><div class="admin-post-title"><img src={post.cover_image || '/covers/default.svg'} alt="" /><div><strong>{post.title}</strong><small>/{post.slug}</small></div></div></td><td><span class={`status-badge ${post.status}`}>{statusLabels[post.status]}</span></td><td>{formatDateTime(post.updated_at)}</td><td><div class="row-actions"><a href={`/admin/posts/${post.id}/edit`}>编辑</a></div></td></tr>)}
+      </tbody></table></div>
+    </section>
+    <div>
+      <section class="panel"><div class="panel-header"><h2>快速开始</h2></div><div class="panel-body quick-list">
+        <a class="quick-action" href="/admin/posts/new"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 5v14M5 12h14"/></svg><div><strong>写一篇新文章</strong><span>从一个想法开始</span></div><b>→</b></a>
+        <a class="quick-action" href="/admin/assets"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 16V4m-5 5 5-5 5 5M4 15v5h16v-5"/></svg><div><strong>上传图片</strong><span>管理封面与正文资源</span></div><b>→</b></a>
+        <a class="quick-action" href="/rss.xml" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="19" r="2"/><path d="M4 11a9 9 0 0 1 9 9M4 4a16 16 0 0 1 16 16"/></svg><div><strong>检查 RSS 输出</strong><span>确认读者可以正常订阅</span></div><b>↗</b></a>
+      </div></section>
+      <section class="panel" style="margin-top:20px"><div class="panel-body"><div class="admin-note"><strong>本地原型提示</strong>当前使用 Rust + SQLite 运行，管理接口未启用认证。部署到 Cloudflare 时，将替换为 D1 / R2，并由 Access 保护后台。</div></div></section>
+    </div>
+  </div>
+</AdminLayout>

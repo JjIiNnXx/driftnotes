@@ -1,0 +1,137 @@
+---
+import type { Post } from '../lib/api';
+
+interface Props { post?: Post }
+const { post } = Astro.props;
+const isEdit = Boolean(post);
+const initial = post || {
+  id: '', title: '', slug: '', excerpt: '', content_markdown: '', content_html: '',
+  status: 'draft', version: 1, cover_image: '', tags: [], published_at: null, created_at: '', updated_at: '',
+};
+---
+<form class="editor-layout" id="post-editor">
+  <section class="editor-panel">
+    <div class="editor-toolbar"><strong>{isEdit ? '编辑文章' : '撰写新文章'}</strong><span class="save-state" id="save-state">所有更改尚未保存</span></div>
+    <div class="editor-fields">
+      <div class="field"><label for="title">文章标题 <small>必填</small></label><input class="title-input" id="title" name="title" value={initial.title} placeholder="给这篇文章一个清晰的标题" required maxlength="120" /></div>
+      <div class="field-row">
+        <div class="field"><label for="slug">固定链接 / Slug <small>{initial.status === 'published' ? '发布后不可修改' : '小写字母、数字、连字符'}</small></label><input id="slug" name="slug" value={initial.slug} placeholder="my-first-post" pattern="[a-z0-9]+(?:-[a-z0-9]+)*" required disabled={initial.status === 'published'} /></div>
+        <div class="field"><label for="tags">话题标签 <small>用逗号分隔</small></label><input id="tags" name="tags" value={initial.tags.map(tag => tag.name).join(', ')} placeholder="技术, Rust, 写作" /></div>
+      </div>
+      <div class="field"><label for="excerpt">内容摘要 <small>用于列表和 SEO</small></label><textarea id="excerpt" name="excerpt" rows="3" maxlength="300" placeholder="用一两句话说明这篇文章讲了什么">{initial.excerpt}</textarea></div>
+      <div class="field"><label for="cover_image">封面图片地址 <small><a href="/admin/assets">管理图片 →</a></small></label><input id="cover_image" name="cover_image" value={initial.cover_image || ''} placeholder="/images/... 或 /covers/garden.svg" /><span class="field-help">可以选择本地内置封面，也可以从图片资源库复制上传地址。</span></div>
+      <div class="field"><label for="content_markdown">Markdown 正文 <small>支持标题、列表、引用和代码块</small></label><textarea class="markdown-input" id="content_markdown" name="content_markdown" placeholder={'## 从这里开始\n\n写下你的想法…'} spellcheck="false">{initial.content_markdown}</textarea><span class="field-help">原始 HTML 会被过滤；预览与公开页使用同一个 Rust 渲染接口。</span></div>
+    </div>
+    <div class="editor-footer">
+      <div class="editor-footer-left"><button class="button secondary" type="button" id="save-draft">保存草稿</button><button class="button" type="button" id="publish-post">{initial.status === 'published' ? '更新已发布文章' : '发布文章'}</button></div>
+      <a class="text-link" href="/admin/posts">返回列表</a>
+    </div>
+  </section>
+  <aside class="preview-panel">
+    <div class="preview-header"><strong>实时预览</strong><span id="preview-status">与公开页渲染一致</span></div>
+    <div class="preview-content">
+      <img class="cover-preview" id="cover-preview" src={initial.cover_image || '/covers/default.svg'} alt="封面预览" />
+      <h1 id="preview-title">{initial.title || '文章标题预览'}</h1>
+      <div class="prose" id="preview-body" set:html={initial.content_html || '<div class="preview-placeholder">开始书写后，这里会显示排版效果。</div>'} />
+    </div>
+  </aside>
+</form>
+<script define:vars={{ initialPost: initial }}>
+  (() => {
+    const form = document.getElementById('post-editor');
+    const title = document.getElementById('title');
+    const slug = document.getElementById('slug');
+    const markdown = document.getElementById('content_markdown');
+    const cover = document.getElementById('cover_image');
+    const saveState = document.getElementById('save-state');
+    const previewStatus = document.getElementById('preview-status');
+    const storageKey = initialPost.id ? `qichi-post-${initialPost.id}` : 'qichi-post-new';
+    let previewTimer;
+    let dirty = false;
+    let saving = false;
+
+    const payload = (status) => ({
+      title: title.value.trim(), slug: slug.value.trim(),
+      excerpt: document.getElementById('excerpt').value.trim(),
+      content_markdown: markdown.value,
+      cover_image: cover.value.trim(),
+      tags: document.getElementById('tags').value.split(/[,，]/).map(v => v.trim()).filter(Boolean),
+      status, version: initialPost.version,
+    });
+    const markDirty = () => { dirty = true; saveState.textContent = '有未保存的更改'; };
+    const updatePreview = async () => {
+      document.getElementById('preview-title').textContent = title.value || '文章标题预览';
+      document.getElementById('cover-preview').src = cover.value || '/covers/default.svg';
+      if (!markdown.value.trim()) { document.getElementById('preview-body').innerHTML = '<div class="preview-placeholder">开始书写后，这里会显示排版效果。</div>'; return; }
+      previewStatus.textContent = '正在渲染…';
+      try {
+        const response = await fetch('/api/admin/render', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ markdown: markdown.value }) });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error?.message || '预览失败');
+        document.getElementById('preview-body').innerHTML = result.data.html;
+        previewStatus.textContent = '与公开页渲染一致';
+      } catch (error) { previewStatus.textContent = error.message; }
+    };
+    const schedulePreview = () => { markDirty(); clearTimeout(previewTimer); previewTimer = setTimeout(updatePreview, 350); };
+    form.addEventListener('submit', event => event.preventDefault());
+    markdown.addEventListener('input', schedulePreview);
+    title.addEventListener('input', () => { markDirty(); document.getElementById('preview-title').textContent = title.value || '文章标题预览'; });
+    cover.addEventListener('input', () => { markDirty(); document.getElementById('cover-preview').src = cover.value || '/covers/default.svg'; });
+    form.querySelectorAll('input, textarea').forEach(field => field.addEventListener('change', markDirty));
+
+    const saveLocal = () => {
+      if (!dirty) return;
+      localStorage.setItem(storageKey, JSON.stringify({ ...payload(initialPost.status), savedAt: Date.now() }));
+      saveState.textContent = `草稿已自动保存在浏览器 · ${new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}`;
+    };
+    setInterval(saveLocal, 15000);
+
+    const storedDraft = localStorage.getItem(storageKey);
+    if (storedDraft) {
+      try {
+        const draft = JSON.parse(storedDraft);
+        const savedAt = draft.savedAt ? new Date(draft.savedAt).toLocaleString('zh-CN') : '上次';
+        if (confirm(`发现 ${savedAt} 自动保存的浏览器草稿，是否恢复？`)) {
+          title.value = draft.title || title.value;
+          if (!slug.disabled) slug.value = draft.slug || slug.value;
+          document.getElementById('excerpt').value = draft.excerpt || '';
+          document.getElementById('tags').value = (draft.tags || []).join(', ');
+          cover.value = draft.cover_image || '';
+          markdown.value = draft.content_markdown || '';
+          markDirty();
+          updatePreview();
+        } else {
+          localStorage.removeItem(storageKey);
+        }
+      } catch {
+        localStorage.removeItem(storageKey);
+      }
+    }
+
+    const save = async (status) => {
+      if (saving) return;
+      if (!title.value.trim()) { title.focus(); window.showToast('请先填写文章标题', 'error'); return; }
+      if (!slug.value.trim()) slug.value = `post-${Date.now().toString(36)}`;
+      saving = true;
+      saveState.textContent = '正在保存…'; saveState.classList.add('saving');
+      try {
+        const isEdit = Boolean(initialPost.id);
+        const response = await fetch(isEdit ? `/api/admin/posts/${initialPost.id}` : '/api/admin/posts', {
+          method: isEdit ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload(status)),
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error?.message || '保存失败');
+        const saved = result.data.post || result.data;
+        initialPost.id = saved.id; initialPost.version = saved.version; initialPost.status = saved.status;
+        localStorage.removeItem(storageKey); dirty = false;
+        window.showToast(status === 'published' ? '文章已发布' : '草稿已保存');
+        setTimeout(() => { if (!isEdit) location.href = `/admin/posts/${saved.id}/edit`; else location.reload(); }, 500);
+      } catch (error) {
+        window.showToast(error.message, 'error'); saveState.textContent = '保存失败，请重试';
+      } finally { saving = false; saveState.classList.remove('saving'); }
+    };
+    document.getElementById('save-draft').addEventListener('click', () => save('draft'));
+    document.getElementById('publish-post').addEventListener('click', () => save('published'));
+    window.addEventListener('beforeunload', event => { if (dirty && !saving) { event.preventDefault(); event.returnValue = ''; } });
+  })();
+</script>

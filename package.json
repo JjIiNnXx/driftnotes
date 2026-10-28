@@ -1,0 +1,15 @@
+{
+  "name": "qichi-blog",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "frontend"
+  ],
+  "scripts": {
+    "dev": "bash script/dev.sh",
+    "dev:frontend": "npm --workspace frontend run dev",
+    "dev:backend": "cargo run --manifest-path backend/Cargo.toml",
+    "build": "npm --workspace frontend run build",
+    "check": "bash script/check.sh"
+  }
+}

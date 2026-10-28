@@ -1,0 +1,49 @@
+---
+import '../styles/global.css';
+import '../styles/admin.css';
+
+interface Props { title: string; eyebrow?: string; description?: string }
+const { title, eyebrow = 'WORKSPACE', description } = Astro.props;
+const path = Astro.url.pathname;
+---
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex,nofollow" /><link rel="icon" href="/favicon.svg" />
+  <title>{title} · 栖迟后台</title>
+</head>
+<body class="admin-body">
+  <div class="admin-layout">
+    <aside class="admin-sidebar">
+      <a class="admin-brand" href="/admin"><span class="brand-mark"><i></i><i></i></span><span><strong>栖迟</strong><small>CONTENT STUDIO</small></span></a>
+      <nav class="admin-nav">
+        <span class="admin-nav-label">工作台</span>
+        <a class:list={[{ active: path === '/admin' }]} href="/admin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>概览</a>
+        <a class:list={[{ active: path.startsWith('/admin/posts') }]} href="/admin/posts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3h9l4 4v14H6zM14 3v5h5M9 13h6M9 17h6"/></svg>文章管理</a>
+        <a class:list={[{ active: path.startsWith('/admin/assets') }]} href="/admin/assets"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>图片资源</a>
+        <span class="admin-nav-label">快捷入口</span>
+        <a href="/admin/posts/new"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 5v14M5 12h14"/></svg>写新文章</a>
+        <a href="/" target="_blank"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 11 12 4l9 7M5 10v10h14V10M9 20v-6h6v6"/></svg>查看博客<small>↗</small></a>
+      </nav>
+      <div class="admin-user"><div class="avatar">栖</div><div><strong>栖迟</strong><span>本站管理员</span></div><span class="status-dot"></span></div>
+    </aside>
+    <div class="admin-main">
+      <header class="admin-topbar"><button class="admin-menu" aria-label="打开菜单">☰</button><div class="admin-breadcrumb"><span>栖迟</span><b>/</b><span>{title}</span></div><div class="admin-top-actions"><span class="local-badge"><i></i>本地开发环境</span><a href="/" target="_blank">查看网站 ↗</a></div></header>
+      <main class="admin-content">
+        <div class="admin-page-heading"><div><div class="admin-eyebrow">{eyebrow}</div><h1>{title}</h1>{description && <p>{description}</p>}</div><div class="admin-heading-actions"><slot name="actions" /></div></div>
+        <slot />
+      </main>
+    </div>
+  </div>
+  <div class="toast" role="status" aria-live="polite"></div>
+  <script is:inline>
+    window.showToast = (message, type = 'success') => {
+      const toast = document.querySelector('.toast');
+      toast.textContent = message; toast.className = `toast show ${type}`;
+      clearTimeout(window.toastTimer); window.toastTimer = setTimeout(() => toast.className = 'toast', 3000);
+    };
+    document.querySelector('.admin-menu')?.addEventListener('click', () => document.body.classList.toggle('admin-nav-open'));
+  </script>
+</body>
+</html>

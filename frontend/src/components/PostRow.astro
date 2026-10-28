@@ -1,0 +1,16 @@
+---
+import type { Post } from '../lib/api';
+import { formatDate, readingTime } from '../lib/format';
+
+interface Props { post: Post }
+const { post } = Astro.props;
+---
+<article class="post-row">
+  <a class="post-row-image" href={`/posts/${post.slug}`} tabindex="-1"><img src={post.cover_image || '/covers/default.svg'} alt="" loading="lazy" /></a>
+  <div>
+    <div class="post-meta"><time>{formatDate(post.published_at)}</time><span class="dot"></span><span>{post.tags[0]?.name || '随笔'}</span></div>
+    <a href={`/posts/${post.slug}`}><h3>{post.title}</h3></a>
+    <p>{post.excerpt}</p>
+    <div class="post-row-bottom"><div class="mini-tags">{post.tags.slice(0, 2).map(tag => <span>#{tag.name}</span>)}</div><span class="read-time">{readingTime(post)}</span></div>
+  </div>
+</article>

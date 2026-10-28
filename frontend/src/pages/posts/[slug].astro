@@ -1,0 +1,39 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getPost } from '../../lib/api';
+import { formatDate, readingTime } from '../../lib/format';
+
+const { slug } = Astro.params;
+let data;
+try { data = await getPost(slug!); } catch { return Astro.redirect('/404'); }
+const { post, previous, next } = data;
+const structuredData = {
+  '@context': 'https://schema.org', '@type': 'BlogPosting', headline: post.title,
+  description: post.excerpt, datePublished: post.published_at, dateModified: post.updated_at,
+  image: post.cover_image ? new URL(post.cover_image, Astro.url.origin) : undefined,
+  author: { '@type': 'Person', name: '栖迟' },
+};
+---
+<BaseLayout title={`${post.title} · 栖迟`} description={post.excerpt} image={post.cover_image || undefined}>
+  <script type="application/ld+json" set:html={JSON.stringify(structuredData)} slot="head" />
+  <article>
+    <header class="article-hero"><div class="shell article-header">
+      <div class="eyebrow">{post.tags[0]?.name || '随笔'} · Essay</div>
+      <h1>{post.title}</h1>
+      <div class="post-meta"><time>{formatDate(post.published_at)}</time><span class="dot"></span><span>{readingTime(post)}</span><span class="dot"></span><span>栖迟</span></div>
+    </div></header>
+    <div class="article-cover"><img src={post.cover_image || '/covers/default.svg'} alt={post.title} /></div>
+    <div class="shell article-layout">
+      <aside class="article-share"><span>SHARE</span><a href={`https://twitter.com/intent/tweet?url=${encodeURIComponent(Astro.url.href)}&text=${encodeURIComponent(post.title)}`} target="_blank" rel="noreferrer" aria-label="分享到 X"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 2H22l-6.8 7.8L23.2 22h-6.3l-4.9-6.4L6.4 22H3.2l7.3-8.3L1 2h6.4l4.4 5.8L18.9 2Zm-1.1 18h1.7L7 3.9H5.2L17.8 20Z"/></svg></a><a href={`mailto:?subject=${encodeURIComponent(post.title)}&body=${encodeURIComponent(Astro.url.href)}`} aria-label="邮件分享"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></a></aside>
+      <div>
+        <div class="prose" set:html={post.content_html} />
+        <div class="article-tags">{post.tags.map(tag => <a href={`/tags/${tag.slug}`}>#{tag.name}</a>)}</div>
+      </div>
+      <aside class="article-toc"></aside>
+    </div>
+  </article>
+  <nav class="shell article-nav" aria-label="上下篇">
+    {previous ? <a href={`/posts/${previous.slug}`}><span>← 上一篇</span><strong>{previous.title}</strong></a> : <span></span>}
+    {next && <a class="next" href={`/posts/${next.slug}`}><span>下一篇 →</span><strong>{next.title}</strong></a>}
+  </nav>
+</BaseLayout>

@@ -1,0 +1,45 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import EmptyState from '../../../components/EmptyState.astro';
+import { apiFetch, type Post } from '../../../lib/api';
+import { formatDateTime, statusLabels } from '../../../lib/format';
+
+const status = Astro.url.searchParams.get('status') || '';
+const query = Astro.url.searchParams.get('q') || '';
+const params = new URLSearchParams();
+if (status) params.set('status', status);
+if (query) params.set('q', query);
+const result = await apiFetch<{ data: { items: Post[] } | Post[] }>(`/api/admin/posts?${params}`);
+const posts = Array.isArray(result.data) ? result.data : result.data.items;
+const tabs = [{ value: '', label: '全部' }, { value: 'published', label: '已发布' }, { value: 'draft', label: '草稿' }, { value: 'archived', label: '已归档' }];
+---
+<AdminLayout title="文章管理" eyebrow="CONTENT" description="创建、编辑和组织你的全部文章。">
+  <a slot="actions" class="button" href="/admin/posts/new">＋ 新建文章</a>
+  <div class="admin-filterbar">
+    <nav class="filter-tabs">{tabs.map(tab => <a class:list={[{ active: status === tab.value }]} href={`/admin/posts${tab.value ? `?status=${tab.value}` : ''}`}>{tab.label}</a>)}</nav>
+    <form method="get"><input class="admin-search" type="search" name="q" value={query} placeholder="搜索标题或 slug…" /></form>
+  </div>
+  <section class="panel">
+    {posts.length ? <div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>文章</th><th>标签</th><th>状态</th><th>最后更新</th><th style="text-align:right">操作</th></tr></thead><tbody>
+      {posts.map(post => <tr>
+        <td><div class="admin-post-title"><img src={post.cover_image || '/covers/default.svg'} alt="" /><div><strong>{post.title}</strong><small>/{post.slug}</small></div></div></td>
+        <td>{post.tags.slice(0, 2).map(tag => <span class="mini-tags">#{tag.name} </span>)}</td>
+        <td><span class={`status-badge ${post.status}`}>{statusLabels[post.status]}</span></td>
+        <td>{formatDateTime(post.updated_at)}</td>
+        <td><div class="row-actions">{post.status === 'published' && <a href={`/posts/${post.slug}`} target="_blank">查看</a>}<a href={`/admin/posts/${post.id}/edit`}>编辑</a>{post.status !== 'archived' && <button class="danger archive-post" data-id={post.id} data-title={post.title}>归档</button>}</div></td>
+      </tr>)}
+    </tbody></table></div> : <div style="padding:20px"><EmptyState title="没有符合条件的文章" message="换个筛选条件，或者写一篇新文章。" /></div>}
+  </section>
+  <script>
+    document.querySelectorAll<HTMLButtonElement>('.archive-post').forEach(button => button.addEventListener('click', async () => {
+      if (!confirm(`确定归档《${button.dataset.title}》吗？归档后公开页面将不再显示。`)) return;
+      button.disabled = true;
+      try {
+        const response = await fetch(`/api/admin/posts/${button.dataset.id}`, { method: 'DELETE' });
+        if (!response.ok) throw new Error('归档失败');
+        (window as any).showToast('文章已归档');
+        setTimeout(() => location.reload(), 500);
+      } catch (error) { (window as any).showToast(error instanceof Error ? error.message : '操作失败', 'error'); button.disabled = false; }
+    }));
+  </script>
+</AdminLayout>
