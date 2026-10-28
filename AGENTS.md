@@ -65,15 +65,19 @@ Create a local commit only when the user requests it or when it is required by a
 - After the owner confirms the merge, update local `main` with `git checkout main && git pull --rebase origin main` and delete the local feature branch.
 - Run `bash script/setup-git-hooks.sh` once per clone. The local `pre-push` hook fails fast on direct pushes to `main`; GitHub branch protection also blocks them server-side for everyone, including admins.
 - When the user requests a commit, use a symbol-level message: a one-line purpose, then one bullet per added, modified, or deleted named symbol explaining why. File-level bullets are allowed only for artifacts without named code symbols (docs, SQL, config, generated assets).
+- Always qualify a symbol: `<Type>::<method>()` for methods, `<module>::<function>()` for free functions, for example `PostService::create()`, `PostRepository::create()`, `db::initialize()`, `handlers::public::get_post()`. Never write a bare `create()` or `initialize()`, even when the name is currently unique, so each bullet points at exactly one function. Keep the path for artifacts that have no named symbol.
+- When a rebase conflict appears, read both sides before editing: `git log --oneline -- <path>` and `git show <sha>` record why each change exists, which is what decides what to keep. Never resolve by taking one side blindly.
 
 ```text
 <type>(<scope>): <one-line purpose>
 
 <Module or domain>:
-- <AddedOrChangedSymbol>(): <why it changed>
-- <DeletedSymbol>(): removed -- <reason>
+- <Type::method()> or <module::function()>: <why it changed>
+- <DeletedSymbol>: removed -- <reason>
 - <file-or-artifact>: <why>  # only when no named symbol
 ```
+
+The bullets are the record of intent: during a rebase they show which side to keep, and for later work they explain why a decision was made so new changes stay consistent with it instead of undoing it by accident.
 
 Do not add AI/model/tool co-author trailers.
 
