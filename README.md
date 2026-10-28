@@ -57,9 +57,11 @@ npm run build            # 构建前端
 
 ## CI 与分支
 
-GitHub Actions 在 pull request 和 `main` 上运行 `check`，执行与本地一致的 `bash script/check.sh`；`guard-main` 会在 `main` 收到推送后检查 force push 和 PR 关联。
+GitHub Actions 在 PR 打开或更新时先运行 `check`，检查的是即将合入 `main` 的 merge commit；合入后 `main` 再运行一次。`guard-main` 会在 `main` 收到推送后检查 force push 和 PR 关联。
 
-私有仓库免费计划不支持 GitHub 分支保护或 rulesets，因此仓库使用两层兜底：本地 `pre-push` 阻止直推 `main`，CI 在远端做合并后检查。首次克隆后执行一次：
+PR 只能由维护者在 GitHub 网页手动点击 **Rebase and merge** 合入。Agent 不得使用 `gh pr merge`、合并 API 或 auto-merge；仓库已关闭 auto-merge，只保留 rebase merge。合并前请确认 `check` 为绿色。
+
+私有仓库免费计划不支持 GitHub 分支保护或 rulesets，因此仓库使用两层兜底：本地 `pre-push` 阻止直推 `main`，CI 在远端做 PR 和合并后检查。首次克隆后执行一次：
 
 ```bash
 bash script/setup-git-hooks.sh

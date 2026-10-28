@@ -5,6 +5,7 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
   workflow_dispatch:
 
 permissions:
@@ -20,8 +21,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
+      # For pull_request events, checkout defaults to refs/pull/<n>/merge,
+      # so the checks validate the result of merging the PR into main.
       - name: Checkout
         uses: actions/checkout@v7.0.1
+
+      - name: Show tested revision
+        run: echo "Validating ${GITHUB_SHA} for ${GITHUB_EVENT_NAME}"
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
