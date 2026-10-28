@@ -8,7 +8,7 @@
 
 环境要求：
 
-- Rust 1.85+（`cargo` 在 PATH 中）
+- Rust 1.85+（`cargo` 在 PATH 中，需安装 `rustfmt` 与 `clippy` 组件）
 - Node.js 22.23+ 与 npm
 
 ```bash
@@ -48,20 +48,42 @@ script/     一键启动与检查脚本
 
 ```bash
 bash script/dev.sh       # 一键启动前后端
-bash script/check.sh     # 文档索引 + cargo fmt/test + Astro build
+bash script/check.sh     # 文档索引 + fmt + clippy + test + Astro 类型检查与构建
 bash script/setup-git-hooks.sh  # 启用 pre-push，阻止直推 main
 npm run dev:backend      # 只启动 Rust API（8787）
 npm run dev:frontend     # 只启动 Astro（4321）
 npm run build            # 构建前端
 ```
 
-## CI 与分支
+## CI 与分支保护
 
-GitHub Actions 在 PR 打开或更新时先运行 `check`，检查的是即将合入 `main` 的 merge commit；合入后 `main` 再运行一次。`guard-main` 会在 `main` 收到推送后检查 force push 和 PR 关联。
+`main` 已开启 GitHub 分支保护，规则对管理员同样生效：
 
-PR 只能由维护者在 GitHub 网页手动点击 **Rebase and merge** 合入。Agent 不得使用 `gh pr merge`、合并 API 或 auto-merge；仓库已关闭 auto-merge，只保留 rebase merge。合并前请确认 `check` 为绿色。
+- 必须通过 PR 合入，禁止直接推送、force push 和删除分支；
+- 必需检查 `ci` 必须通过，红灯时网页上的合并按钮不可用；
+- 要求分支与 `main` 同步（strict），历史保持线性；
+- 只允许 rebase merge，合并后自动删除 head 分支。
 
-私有仓库免费计划不支持 GitHub 分支保护或 rulesets，因此仓库使用两层兜底：本地 `pre-push` 阻止直推 `main`，CI 在远端做 PR 和合并后检查。首次克隆后执行一次：
+CI 只有一个工作流 `.github/workflows/ci.yml`，只在 PR 打开、更新、重新打开或转为 ready 时运行。PR 事件下检出的是 GitHub 生成的 merge commit，即“把该 PR 合入 `main` 后”的结果。
+
+| 步骤 | 内容 |
+|-|-|
+| 密钥扫描 | gitleaks 固定版本并校验 SHA-256，扫描完整历史，日志脱敏 |
+| 敏感文件 | 拒绝提交 `.env*`（`.env.example` 除外） |
+| 文档索引 | `docs/index.toml` 中的路径必须存在 |
+| 格式 | `cargo fmt --check` |
+| 静态检查 | `cargo clippy --all-targets -- -D warnings` |
+| 单元测试 | `cargo test` |
+| 类型检查 | `astro check` |
+| 构建 | `astro build` |
+
+后五项由 `bash script/check.sh` 统一执行，本地与 CI 一致。
+
+仓库同时开启 GitHub 自带的 secret scanning 与 push protection，推送含已知密钥的提交会被服务端直接拒绝。
+
+PR 只能由维护者在 GitHub 网页手动点击 **Rebase and merge** 合入。Agent 不得使用 `gh pr merge`、合并 API 或 auto-merge；仓库已关闭 auto-merge。合并前确认 `ci` 为绿色。
+
+本地 `pre-push` 仍会提前拦截直推 `main`，避免推到远端才被拒绝。首次克隆后执行一次：
 
 ```bash
 bash script/setup-git-hooks.sh
