@@ -5,7 +5,7 @@ import { getArchive } from '../lib/api';
 
 const archive = await getArchive();
 ---
-<BaseLayout title="文章归档 · 栖迟" description="按年份和月份浏览栖迟的全部文章。">
+<BaseLayout title="文章归档 · 漂流笔记" description="按年份和月份浏览漂流笔记的全部文章。">
   <section class="page-hero"><div class="shell"><div class="eyebrow">Along the timeline</div><h1>文章归档</h1><p>时间让零散的记录有了秩序。回到某一年、某个月，看看当时正在思考什么。</p></div></section>
   <section class="page-content"><div class="shell archive-list">
     {archive.length ? archive.map(year => <section class="archive-year"><h2>{year.year}</h2><div>{year.months.map(month => <div class="archive-month"><h3>{String(month.month).padStart(2, '0')} 月</h3>{month.posts.map(post => <div class="archive-item"><time>{new Date(post.published_at!).getDate().toString().padStart(2, '0')}日</time><a href={`/posts/${post.slug}`}>{post.title}</a><span>{post.tags[0]?.name}</span></div>)}</div>)}</div></section>) : <EmptyState />}

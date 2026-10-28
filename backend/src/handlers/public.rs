@@ -12,7 +12,7 @@ pub async fn health() -> Json<Value> {
     Json(json!({
         "ok": true,
         "data": {
-            "service": "qichi-blog-api",
+            "service": "driftnotes-api",
             "runtime": "rust",
             "storage": "sqlite+local"
         }

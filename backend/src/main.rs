@@ -77,7 +77,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let app = router::app(state);
 
     let listener = TcpListener::bind(address).await?;
-    println!("qichi blog API listening on http://{address}");
+    println!("driftnotes API listening on http://{address}");
     println!("data directory: {}", data_dir.display());
     logging::info("app", format!("listening on http://{address}"));
     axum::serve(

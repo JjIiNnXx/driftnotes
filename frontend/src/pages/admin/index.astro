@@ -12,7 +12,7 @@ const stats = statsResult.data;
 const recent = (Array.isArray(postsResult.data) ? postsResult.data : postsResult.data.items).slice(0, 5);
 const sizeMb = ((stats.asset_size_bytes || 0) / 1024 / 1024).toFixed(1);
 ---
-<AdminLayout title="工作台" eyebrow="OVERVIEW" description="早上好，栖迟。这里是你博客的最新情况。">
+<AdminLayout title="工作台" eyebrow="OVERVIEW" description="早上好，漂流笔记。这里是你博客的最新情况。">
   <a slot="actions" class="button" href="/admin/posts/new">＋ 写新文章</a>
   <section class="stats-grid">
     <div class="stat-card"><div class="stat-top"><span>全部文章</span><span class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 3h9l4 4v14H6zM14 3v5h5M9 13h6M9 17h6"/></svg></span></div><strong class="stat-value">{stats.total_posts}</strong><span class="stat-note">持续记录，慢慢积累</span></div>

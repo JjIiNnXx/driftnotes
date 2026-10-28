@@ -55,7 +55,7 @@ async function cleanup() {
  */
 export function requestLogger() {
   return {
-    name: 'qichi-request-logger',
+    name: 'driftnotes-request-logger',
     apply: 'serve',
     async configureServer(server) {
       await mkdir(LOG_DIR, { recursive: true });

@@ -90,7 +90,7 @@ button { color: inherit; }
 .text-link:hover svg { transform: translateX(4px); }
 
 .home-hero { position: relative; padding: 82px 0 74px; overflow: hidden; }
-.home-hero::after { content: "栖"; position: absolute; right: -10px; top: -100px; font-family: var(--serif); font-size: 460px; line-height: 1; color: var(--accent); opacity: .025; pointer-events: none; }
+.home-hero::after { content: "漂"; position: absolute; right: -10px; top: -100px; font-family: var(--serif); font-size: 460px; line-height: 1; color: var(--accent); opacity: .025; pointer-events: none; }
 .hero-grid { display: grid; grid-template-columns: 1.02fr .98fr; gap: 78px; align-items: center; position: relative; z-index: 1; }
 .hero-copy h1 { margin: 22px 0 24px; font-family: var(--serif); font-size: clamp(38px, 4.5vw, 60px); line-height: 1.35; letter-spacing: .04em; font-weight: 650; }
 .hero-copy h1 em { color: var(--accent); font-style: normal; position: relative; }

@@ -94,7 +94,7 @@ fi
 
 cat <<EOF
 
-  栖迟 · 本地开发环境已启动
+  漂流笔记 · 本地开发环境已启动
 
   博客首页   $FRONTEND_URL
   管理后台   $FRONTEND_URL/admin

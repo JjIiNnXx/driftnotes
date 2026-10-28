@@ -9,7 +9,7 @@ const query = Astro.url.searchParams.get('q') || '';
 const data = await getPosts({ page, pageSize: 9, q: query });
 const { items, pagination } = data;
 ---
-<BaseLayout title="全部文章 · 栖迟" description="浏览栖迟的全部文章，包括技术、写作、阅读和生活。">
+<BaseLayout title="全部文章 · 漂流笔记" description="浏览漂流笔记的全部文章，包括技术、写作、阅读和生活。">
   <section class="page-hero"><div class="shell"><div class="eyebrow">All essays</div><h1>全部文章</h1><p>一些经过整理的经验、想法和生活片段。按时间倒序排列，共 {pagination.total} 篇。</p></div></section>
   <section class="page-content"><div class="shell">
     {items.length ? <div class="post-grid">{items.map(post => <PostCard post={post} />)}</div> : <EmptyState title="没有找到文章" />}
