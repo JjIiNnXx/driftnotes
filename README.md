@@ -49,9 +49,20 @@ script/     一键启动与检查脚本
 ```bash
 bash script/dev.sh       # 一键启动前后端
 bash script/check.sh     # 文档索引 + cargo fmt/test + Astro build
+bash script/setup-git-hooks.sh  # 启用 pre-push，阻止直推 main
 npm run dev:backend      # 只启动 Rust API（8787）
 npm run dev:frontend     # 只启动 Astro（4321）
 npm run build            # 构建前端
+```
+
+## CI 与分支
+
+GitHub Actions 在 pull request 和 `main` 上运行 `check`，执行与本地一致的 `bash script/check.sh`；`guard-main` 会在 `main` 收到推送后检查 force push 和 PR 关联。
+
+私有仓库免费计划不支持 GitHub 分支保护或 rulesets，因此仓库使用两层兜底：本地 `pre-push` 阻止直推 `main`，CI 在远端做合并后检查。首次克隆后执行一次：
+
+```bash
+bash script/setup-git-hooks.sh
 ```
 
 ## 本地数据

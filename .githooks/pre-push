@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Block direct pushes to main. This is a local guard because GitHub branch
+# protection/rulesets are unavailable for private repositories on the free plan.
+set -euo pipefail
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+  if [ "$remote_ref" = "refs/heads/main" ]; then
+    cat >&2 <<'EOF'
+Direct pushes to main are blocked by the local Git hook.
+
+Create a feature_<short-name> branch, push it, and open a PR targeting main.
+To bypass intentionally, run: git push --no-verify
+EOF
+    exit 1
+  fi
+done

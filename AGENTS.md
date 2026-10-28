@@ -37,6 +37,7 @@ Create a local commit only when the user requests it or when it is required by a
 - Run the backend from `backend/` or set `BLOG_DATA_DIR`; the default data dir is relative to the current working directory. `script/dev.sh` pins it to `backend/data/`.
 - Astro 7 daemonizes in non-interactive shells. Stop strays with `cd frontend && npx astro dev stop`; inspect them with `npx astro dev logs`.
 - Single backend test: `cd backend && cargo test <name>`. Backend tests are inline `#[cfg(test)]` modules under `backend/src/services/`; there are no frontend tests.
+- CI (`.github/workflows/check.yml`) runs `bash script/check.sh` on pull requests and `main`. Keep it green before merging.
 
 ## Before Coding
 
@@ -60,6 +61,7 @@ Create a local commit only when the user requests it or when it is required by a
 - Keep history linear. Rebase onto `origin/main` before opening or updating the MR: `git fetch origin && git rebase origin/main`. Resolve conflicts during rebase; never merge `main` into the feature branch and never create a merge commit.
 - Push the feature branch and open the MR only when the user asks to deliver/merge. If a pushed branch was rebased, update it with `git push --force-with-lease origin feature_<short-name>`; never force-push `main`.
 - Merge the MR with rebase or fast-forward, not a merge commit. Then update local `main` with `git checkout main && git pull --rebase origin main` and delete the feature branch.
+- Run `bash script/setup-git-hooks.sh` once per clone. The local `pre-push` hook blocks direct pushes to `main`; GitHub branch protection is unavailable for private repositories on the free plan, so CI also runs a `guard-main` check after push.
 - When the user requests a commit, use a symbol-level message: a one-line purpose, then one bullet per added, modified, or deleted named symbol explaining why. File-level bullets are allowed only for artifacts without named code symbols (docs, SQL, config, generated assets).
 
 ```text
